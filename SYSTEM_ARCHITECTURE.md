@@ -1,0 +1,197 @@
+# KhedraX System Architecture Overview
+### v1.0 — companion to KHEDRAX_CONSTITUTION.md v1.0
+
+The Constitution defines **how** KhedraX must be built. This document defines
+**what** exists in the system: the complete set of engines, how they depend
+on one another, and — for each one — exactly what it owns, reads, writes,
+and must never touch.
+
+Every engine listed here exists **architecturally** from v1, even if its v1
+implementation is a thin pass-through. New capability is added by deepening
+an existing engine's implementation, never by inventing a new one outside
+this map or by letting one engine quietly absorb another's responsibility.
+
+---
+
+## 1. The Complete Engine Map
+
+```
+KhedraX
+├── CLI
+├── Workflow Engine
+├── Validation Engine
+├── Generation Engine
+├── DNA System
+├── Registry System
+├── Template Engine
+├── Module Engine
+├── Persona Engine
+├── Prompt Engine
+├── Memory Engine
+├── Documentation Engine
+└── Packaging Engine
+```
+
+### v1 implementation status
+
+| Engine | v1 status |
+|---|---|
+| CLI | Fully implemented |
+| Workflow Engine | Fully implemented (checkpoint + resume) |
+| DNA System | Fully implemented |
+| Registry System | Fully implemented (agentTypes/, modules/ discovery) |
+| Validation Engine | Implemented at schema + registry-cross-check level only |
+| Generation Engine | Fully implemented as orchestrator |
+| Template Engine | Fully implemented |
+| Module Engine | Fully implemented |
+| Packaging Engine | Implemented at minimum-viable level (atomic write, standalone check) |
+| Persona Engine | Interface defined, v1 implementation is pass-through (echoes DNA.persona unchanged) |
+| Prompt Engine | Interface defined, v1 implementation assembles module prompt fragments verbatim, no persona blending |
+| Memory Engine | Interface defined, v1 implementation scaffolds empty `memory/` from DNA.memory shape only |
+| Documentation Engine | Interface defined, v1 implementation generates README from a static template + DNA values, no persona/module-aware prose |
+
+Every engine marked "pass-through" or "minimum-viable" still sits in its
+correct place in the dependency graph and honors its ownership boundary below.
+Deepening it later is an internal change to that engine only — nothing
+upstream or downstream needs to change.
+
+---
+
+## 2. Dependency Graph
+
+```
+CLI
+ │  (parses args → builds draft AgentDNA)
+ ▼
+Workflow Engine
+ │  (sequences steps, checkpoints each one)
+ ▼
+Validation Engine
+ │  (validates draft DNA against schema + Registry System; hard stop on failure)
+ ▼
+Generation Engine  ◄────────────────────────────────────────┐
+ │  (orchestrator — invokes producer engines below in order) │
+ │                                                            │
+ ├──► DNA System        (source of truth, read by every producer engine)
+ ├──► Registry System   (agentTypes/, modules/ discovery, read by every producer engine)
+ │                                                            │
+ ├──► Template Engine   ─┐                                    │
+ ├──► Module Engine     ─┤                                    │
+ ├──► Persona Engine    ─┼─ all read DNA + Registry System,   │
+ ├──► Prompt Engine     ─┤  write into the in-progress         │
+ ├──► Memory Engine     ─┤  project directory                  │
+ ├──► Documentation Eng.─┘                                    │
+ │                                                            │
+ ▼                                                            │
+Packaging Engine ──────────────────────────────────────────────┘
+ │  (finalizes: standalone check, atomic move to outputDir)
+ ▼
+Generated Project  (standalone — no KhedraX dependency, per Constitution #14)
+```
+
+Key structural rule: **DNA System and Registry System have no upstream
+dependencies within KhedraX.** Everything else depends on them; they depend
+on nothing but the filesystem/schema they own. This is what lets new
+producer engines (a future `Voice Engine`, say) plug in without touching
+DNA or Registry.
+
+Producer engines (Template, Module, Persona, Prompt, Memory, Documentation)
+are siblings, not a chain — the Generation Engine invokes them in a fixed
+order (Template → Module → Persona → Prompt → Memory → Documentation)
+because later ones consume earlier ones' output, but none of them call each
+other directly. All inter-engine communication passes through the Generation
+Engine.
+
+---
+
+## 3. Ownership Matrix
+
+### CLI
+- **Owns:** argument parsing, user-facing command surface, exit codes, help text
+- **Reads:** `process.argv`, environment (Node version check), interactive prompts
+- **Writes:** nothing to disk directly — constructs a draft `AgentDNA` and hands it to the Workflow Engine
+- **Never:** validates business rules beyond input shape; contains agent-type or module-specific logic; writes generated files
+
+### Workflow Engine
+- **Owns:** step sequencing, checkpoint file lifecycle, resume/retry logic
+- **Reads:** the ordered `WorkflowStep[]`, checkpoint files at `~/.khedrax/checkpoints/{buildId}.json`
+- **Writes:** checkpoint files and step-completion state
+- **Never:** knows what any individual step does internally; contains DNA, Registry, or template logic
+
+### Validation Engine
+- **Owns:** DNA schema validation, DNA-vs-Registry cross-checks (does the requested type/module exist), spec-safety scoring
+- **Reads:** draft `AgentDNA`, Registry System's available agentTypes/modules
+- **Writes:** a validation report (errors/warnings), stored as a workflow artifact — never touches the generated project
+- **Never:** generates files, mutates DNA, executes any module or template code
+
+### Generation Engine
+- **Owns:** orchestration order of the producer engines, the atomic generation transaction (write to temp dir, commit on success)
+- **Reads:** validated `AgentDNA`, Registry System, and the output of each producer engine it invokes
+- **Writes:** the generated project directory (via Packaging Engine's atomic commit)
+- **Never:** parses CLI args; contains template-rendering, module-resolution, or persona logic itself; calls an LLM; executes the generated agent
+
+### DNA System
+- **Owns:** the `AgentDNA` schema, defaults, and merge logic (agentType presets + CLI overrides + resume-from-checkpoint)
+- **Reads:** `agent.yaml` on load/resume, CLI-provided overrides
+- **Writes:** the final `agent.yaml` into the generated project (as the canonical spec artifact)
+- **Never:** knows about template files, module implementations, or how generation mechanically happens
+
+### Registry System
+- **Owns:** discovery and indexing of `agentTypes/`, `modules/`, and (later) `personas/` and `prompt-fragments/` from the filesystem
+- **Reads:** those filesystem directories, each entry's own metadata file (`agentType.json`, `module.json`)
+- **Writes:** nothing — read-only index, optionally cached in memory per run
+- **Never:** validates DNA content itself (that's Validation Engine); renders anything; encodes meaning about what a type or module "does"
+
+### Template Engine
+- **Owns:** variable substitution and rendering of base-scaffold template files into concrete output files
+- **Reads:** `templates/agent-base/`, the fields of `AgentDNA` needed for substitution
+- **Writes:** rendered scaffold files into the in-progress (temp) project directory
+- **Never:** decides which modules are included; contains persona or prompt logic; talks to the CLI or Registry directly (goes through Generation Engine)
+
+### Module Engine
+- **Owns:** resolving `AgentDNA.modules` against the Registry System and merging each selected module's `implementation/`, `configuration/`, `prompts/`, `tests/` into the project
+- **Reads:** `module.json` and each module's subdirectories, `AgentDNA.modules`
+- **Writes:** module-derived files into the in-progress project directory
+- **Never:** decides the module set (that's DNA's job, set before this engine runs); executes any module's runtime code; contains persona logic
+
+### Persona Engine
+- **Owns:** deriving persona-facing traits (tone, style, constraints, boundaries) from `AgentDNA.persona`
+- **Reads:** `AgentDNA.persona`, any persona presets in the Registry System
+- **Writes:** an in-memory/derived persona artifact, consumed by Prompt Engine and Documentation Engine — not written directly to the project itself
+- **Never:** writes final prompt files; decides module composition; talks to the CLI
+
+### Prompt Engine
+- **Owns:** assembling the final prompt files from Persona Engine's output plus each selected module's `prompts/` fragments
+- **Reads:** Persona Engine output, Module Engine's resolved prompt fragments, `AgentDNA`
+- **Writes:** the `prompts/` directory in the generated project
+- **Never:** talks to the CLI; decides personas or module set itself; calls any LLM
+
+### Memory Engine
+- **Owns:** scaffolding the `memory/` directory and memory-backend configuration from `AgentDNA.memory` and any module-declared memory requirements
+- **Reads:** `AgentDNA.memory`, `module.json` memory-requirement declarations
+- **Writes:** the `memory/` directory and its configuration in the generated project
+- **Never:** implements actual runtime memory storage logic beyond scaffold/config; executes memory calls
+
+### Documentation Engine
+- **Owns:** generating `README.md` and `docs/` describing the assembled agent
+- **Reads:** final `AgentDNA`, resolved modules, Persona Engine output
+- **Writes:** `README.md` and `docs/` in the generated project
+- **Never:** alters DNA or any other engine's output; makes decisions that affect the generated agent's behavior
+
+### Packaging Engine
+- **Owns:** final-assembly guarantees — enforcing Constitution #14 (no KhedraX runtime dependency anywhere in output), generating a dependency manifest for the generated project, atomically committing the temp directory to `outputDir`
+- **Reads:** the fully-assembled temp project directory
+- **Writes:** the final generated project directory (or archive) at `outputDir`
+- **Never:** renders templates, resolves modules, or invokes Persona/Prompt/Memory/Documentation engines itself — it only verifies and commits their combined output
+
+---
+
+## 4. Why this ordering matters
+
+With Constitution v1.0 and this Architecture Overview both frozen, Work
+Package #1 can now be scoped as: **DNA System + Registry System + Workflow
+Engine + Generation Engine (orchestrating Template Engine + Module Engine,
+with Persona/Prompt/Memory/Documentation/Packaging present as pass-through
+stubs matching their defined interfaces)**. Nothing in that scope requires a
+future redesign — later work packages deepen individual engines in place.
+
