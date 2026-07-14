@@ -46,7 +46,7 @@ function renderModules(modules: string[]): string {
   if (modules.length === 0) {
     return '[]';
   }
-  return modules.map((moduleName) => `- ${moduleName}`).join('\n');
+  return `\n${modules.map((moduleName) => `  - ${moduleName}`).join('\n')}`;
 }
 
 function renderPersona(persona: { presetName?: string; traits?: string[]; tone?: string; constraints?: string[] }): string {

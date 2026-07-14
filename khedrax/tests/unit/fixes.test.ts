@@ -4,6 +4,7 @@ import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { load } from 'js-yaml';
 import { createAgent } from '../../src/cli/commands/create.ts';
 import { loadCheckpoint, saveCheckpoint } from '../../src/cli/utils/checkpoint.ts';
 import { checkNodeVersion } from '../../src/cli/utils/nodeVersion.ts';
@@ -188,8 +189,45 @@ test('agent.yaml is fully rendered and reflects dna modules', async () => {
 
   const agentYaml = await fs.readFile(path.join(outputDir, 'agent.yaml'), 'utf8');
   assert.equal(agentYaml.includes('{{'), false);
-  assert.match(agentYaml, /modules:\n/);
+  assert.match(agentYaml, /modules: /);
   assert.match(agentYaml, /- memory/);
+});
+
+test('generated agent.yaml parses as YAML for zero-module and persona-backed projects', async () => {
+  const workspace = await fs.mkdtemp(path.join(os.tmpdir(), 'khedrax-yaml-'));
+  const fixtureRoot = path.join(workspace, 'fixture');
+  await copyFixture(fixtureRoot);
+
+  const basicOutputDir = path.join(workspace, 'basic-out');
+  await createAgent({
+    name: 'MinimalBot',
+    type: 'basic',
+    outputDir: basicOutputDir,
+    modules: [],
+    force: true,
+    verbose: false,
+    rootDir: fixtureRoot,
+  } as any);
+
+  const basicYaml = await fs.readFile(path.join(basicOutputDir, 'agent.yaml'), 'utf8');
+  const basicParsed = load(basicYaml) as Record<string, unknown>;
+  assert.deepEqual(basicParsed.modules, []);
+
+  const supportOutputDir = path.join(workspace, 'support-out');
+  await createAgent({
+    name: 'SupportBot',
+    type: 'customer-support',
+    outputDir: supportOutputDir,
+    modules: ['memory'],
+    force: true,
+    verbose: false,
+    rootDir: fixtureRoot,
+  } as any);
+
+  const supportYaml = await fs.readFile(path.join(supportOutputDir, 'agent.yaml'), 'utf8');
+  const supportParsed = load(supportYaml) as Record<string, any>;
+  assert.deepEqual(supportParsed.modules, ['memory']);
+  assert.equal(supportParsed.persona?.presetName, 'professional-support');
 });
 
 test('node version guard reports supported versions', () => {
