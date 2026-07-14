@@ -32,6 +32,18 @@ export function validateAgentDNA(dna: AgentDNA, registry: RegistrySnapshot, outp
     }
   }
 
+  if (dna.persona.presetName && !registry.personas[dna.persona.presetName]) {
+    errors.push(`Unknown persona preset '${dna.persona.presetName}'.`);
+  }
+
+  if (dna.persona.traits && (!Array.isArray(dna.persona.traits) || dna.persona.traits.some((value) => typeof value !== 'string' || value.trim().length === 0))) {
+    errors.push('AgentDNA.persona.traits must be an array of non-empty strings.');
+  }
+
+  if (dna.persona.constraints && (!Array.isArray(dna.persona.constraints) || dna.persona.constraints.some((value) => typeof value !== 'string' || value.trim().length === 0))) {
+    errors.push('AgentDNA.persona.constraints must be an array of non-empty strings.');
+  }
+
   if (dna.modules.includes('memory') && Object.keys(dna.memory).length === 0) {
     warnings.push('Memory module selected without memory configuration; a minimal shape will be scaffolded.');
   }

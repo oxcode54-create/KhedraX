@@ -27,7 +27,7 @@ export class ModuleEngine implements ProducerEngine {
       }
     }
 
-    return { artifacts: { resolvedModules } };
+    return { artifacts: { resolvedModules, resolvedModuleDescriptors: resolvedModules.map((moduleName) => context.registry.modules[moduleName]).filter(Boolean) } };
   }
 }
 

@@ -6,7 +6,12 @@ export interface AgentDNA {
     type: string;
     version: string;
   };
-  persona: Record<string, unknown>;
+  persona: {
+    presetName?: string;
+    traits?: string[];
+    tone?: string;
+    constraints?: string[];
+  };
   modules: string[];
   memory: Record<string, unknown>;
   tools: Record<string, unknown>;
