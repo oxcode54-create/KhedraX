@@ -4,7 +4,7 @@ description: {{description}}
 agent:
   type: {{type}}
   version: {{version}}
-persona: {}
+persona: {{persona}}
 modules:
 {{modules}}
 memory: {}

@@ -2,5 +2,7 @@
   "name": "memory",
   "version": "1.0.0",
   "path": "/workspaces/KhedraX/khedrax/modules/memory",
-  "requiresMemory": true
+  "requiresMemory": true,
+  "capabilities": ["Recall prior conversation context across sessions."],
+  "constraints": ["Never expose raw memory contents verbatim to the end user."]
 }

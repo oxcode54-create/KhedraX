@@ -3,6 +3,12 @@ export interface AgentTypeDescriptor {
   version: string;
   defaultModules: string[];
   description?: string;
+  persona?: {
+    presetName?: string;
+    traits?: string[];
+    tone?: string;
+    constraints?: string[];
+  };
 }
 
 export interface ModuleDescriptor {

@@ -1,5 +1,6 @@
 {
   "name": "customer-support",
   "version": "1.0.0",
-  "defaultModules": ["memory"]
+  "defaultModules": ["memory"],
+  "persona": { "presetName": "professional-support" }
 }

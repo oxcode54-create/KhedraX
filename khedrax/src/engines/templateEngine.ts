@@ -33,7 +33,8 @@ export class TemplateEngine implements ProducerEngine {
         .replace(/\{\{buildId\}\}/g, context.dna.buildId)
         .replace(/\{\{description\}\}/g, context.dna.description ?? '')
         .replace(/\{\{version\}\}/g, context.dna.agent.version)
-        .replace(/\{\{modules\}\}/g, renderModules(context.dna.modules));
+      .replace(/\{\{modules\}\}/g, renderModules(context.dna.modules))
+      .replace(/\{\{persona\}\}/g, renderPersona(context.dna.persona));
       await fs.writeFile(targetPath, content);
     }
 
@@ -46,4 +47,30 @@ function renderModules(modules: string[]): string {
     return '[]';
   }
   return modules.map((moduleName) => `- ${moduleName}`).join('\n');
+}
+
+function renderPersona(persona: { presetName?: string; traits?: string[]; tone?: string; constraints?: string[] }): string {
+  const lines: string[] = [];
+  if (persona.presetName) {
+    lines.push(`presetName: ${persona.presetName}`);
+  }
+  if (persona.tone) {
+    lines.push(`tone: ${persona.tone}`);
+  }
+  if (Array.isArray(persona.traits) && persona.traits.length > 0) {
+    lines.push('traits:');
+    for (const trait of persona.traits) {
+      lines.push(`  - ${trait}`);
+    }
+  }
+  if (Array.isArray(persona.constraints) && persona.constraints.length > 0) {
+    lines.push('constraints:');
+    for (const constraint of persona.constraints) {
+      lines.push(`  - ${constraint}`);
+    }
+  }
+  if (lines.length === 0) {
+    return '{}';
+  }
+  return `\n${lines.map((line) => `  ${line}`).join('\n')}`;
 }
