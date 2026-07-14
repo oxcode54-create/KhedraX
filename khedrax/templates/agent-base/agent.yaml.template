@@ -1,0 +1,13 @@
+buildId: {{buildId}}
+name: {{name}}
+description: {{description}}
+agent:
+  type: {{type}}
+  version: {{version}}
+persona: {}
+modules: []
+memory: {}
+tools: {}
+workflows: {}
+deployment: {}
+testing: {}

@@ -1,0 +1,8 @@
+{
+  "name": "khedrax",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "test": "node --test --experimental-strip-types khedrax/tests/unit/*.test.ts"
+  }
+}

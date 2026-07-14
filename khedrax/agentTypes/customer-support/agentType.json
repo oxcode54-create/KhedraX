@@ -1,0 +1,5 @@
+{
+  "name": "customer-support",
+  "version": "1.0.0",
+  "defaultModules": ["memory"]
+}
