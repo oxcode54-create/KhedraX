@@ -48,7 +48,7 @@ KhedraX
 | Persona Engine | Fully implemented as of Work Package #2 — real persona resolution, constraint derivation, capability mapping, behavioral profile generation |
 | Prompt Engine | Fully implemented as of Work Package #3 — layered composition (identity, constraints, capabilities, instructions, escalation) with named-section merging and exclusive-ownership conflict resolution, consuming Persona Engine's behavioral profile |
 | Memory Engine | Interface defined, v1 implementation scaffolds empty `memory/` from DNA.memory shape only |
-| Documentation Engine | Interface defined, v1 implementation generates README from a static template + DNA values, no persona/module-aware prose |
+| Documentation Engine | Fully implemented as of Work Package #5 — renders a concise root README.md and a detailed docs/README.md from Persona Engine's behavioral profile and Module Engine's resolved module descriptors |
 
 Every engine marked "pass-through" or "minimum-viable" still sits in its
 correct place in the dependency graph and honors its ownership boundary below.
