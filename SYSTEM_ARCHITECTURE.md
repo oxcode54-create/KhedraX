@@ -44,7 +44,7 @@ KhedraX
 | Generation Engine | Fully implemented as orchestrator |
 | Template Engine | Fully implemented |
 | Module Engine | Fully implemented |
-| Packaging Engine | Implemented at minimum-viable level (atomic write, standalone check) |
+| Packaging Engine | Fully implemented as of Work Package #7 — writes a deterministic dependency manifest, hardens the standalone scan to also catch leaked build-time absolute paths, and skips irrelevant directories during the scan |
 | Persona Engine | Fully implemented as of Work Package #2 — real persona resolution, constraint derivation, capability mapping, behavioral profile generation |
 | Prompt Engine | Fully implemented as of Work Package #3 — layered composition (identity, constraints, capabilities, instructions, escalation) with named-section merging and exclusive-ownership conflict resolution, consuming Persona Engine's behavioral profile |
 | Memory Engine | Fully implemented as of Work Package #6 — resolves a memory backend from a filesystem-discovered `memoryBackends/` registry (default `in-memory`), merges DNA-level config overrides onto the backend's declared defaults, and cross-references resolved modules' `requiresMemory` declarations, all within scaffold/config only (never runtime storage logic) |
@@ -180,8 +180,8 @@ Engine.
 
 ### Packaging Engine
 - **Owns:** final-assembly guarantees — enforcing Constitution #14 (no KhedraX runtime dependency anywhere in output), generating a dependency manifest for the generated project, atomically committing the temp directory to `outputDir`
-- **Reads:** the fully-assembled temp project directory
-- **Writes:** the final generated project directory (or archive) at `outputDir`
+- **Reads:** the fully-assembled temp project directory, final `AgentDNA`, Module Engine's resolved module descriptors (for the manifest), and the KhedraX installation root path (to detect leaked build-time absolute paths — the one case where Packaging Engine needs to know anything about KhedraX's own location, purely to guarantee the generated output contains no trace of it)
+- **Writes:** `PACKAGE_MANIFEST.json` into the temp directory (as part of the packaging step, before the atomic commit), then the final generated project directory (or archive) at `outputDir`
 - **Never:** renders templates, resolves modules, or invokes Persona/Prompt/Memory/Documentation engines itself — it only verifies and commits their combined output
 
 ---
