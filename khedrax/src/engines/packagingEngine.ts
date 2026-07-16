@@ -1,5 +1,6 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import type { AgentDNA } from '../dna/schema.ts';
 
 export interface PackagingResult {
   outputPath: string;
@@ -11,11 +12,16 @@ export interface PackagingOptions {
   outputDir: string;
   name: string;
   force?: boolean;
+  dna: AgentDNA;
+  resolvedModuleDescriptors: Array<{ name: string; version?: string }>;
+  khedraxRootDir: string;
 }
 
 export class PackagingEngine {
   async run(options: PackagingOptions): Promise<PackagingResult> {
-    const scanResult = await this.scanForKhedraXReferences(options.tempDir);
+    await this.writeManifest(options);
+
+    const scanResult = await this.scanForKhedraXReferences(options.tempDir, options.khedraxRootDir);
     if (!scanResult.standalone) {
       throw new Error(`Packaging rejected generated output due to KhedraX reference: ${scanResult.reason}`);
     }
@@ -45,10 +51,32 @@ export class PackagingEngine {
     return { outputPath, standalone: true };
   }
 
-  private async scanForKhedraXReferences(tempDir: string): Promise<{ standalone: boolean; reason?: string }> {
+  private async writeManifest(options: PackagingOptions): Promise<void> {
+    const manifest = {
+      name: options.dna.name,
+      agentType: options.dna.agent.type,
+      agentVersion: options.dna.agent.version,
+      buildId: options.dna.buildId,
+      modules: (options.resolvedModuleDescriptors ?? [])
+        .map((module) => ({
+          name: module.name,
+          version: module.version ?? '0.0.0',
+        }))
+        .sort((left, right) => left.name.localeCompare(right.name)),
+    };
+
+    const manifestPath = path.join(options.tempDir, 'PACKAGE_MANIFEST.json');
+    await fs.writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, 'utf8');
+  }
+
+  private async scanForKhedraXReferences(tempDir: string, khedraxRootDir: string): Promise<{ standalone: boolean; reason?: string }> {
     const files = await this.collectFiles(tempDir);
     for (const file of files) {
       const content = await fs.readFile(file, 'utf8').catch(() => '');
+      if (content.includes(khedraxRootDir)) {
+        return { standalone: false, reason: `found leaked build-time path in ${path.relative(tempDir, file)}` };
+      }
+
       if (content.match(/khedrax/i) || content.match(/@khedrax\//i) || content.match(/khedrax-runtime/i)) {
         return { standalone: false, reason: `found reference in ${path.relative(tempDir, file)}` };
       }
@@ -62,6 +90,9 @@ export class PackagingEngine {
     for (const entry of entries) {
       const fullPath = path.join(root, entry.name);
       if (entry.isDirectory()) {
+        if (entry.name === '.git' || entry.name === 'node_modules') {
+          continue;
+        }
         results.push(...await this.collectFiles(fullPath));
       } else {
         results.push(fullPath);

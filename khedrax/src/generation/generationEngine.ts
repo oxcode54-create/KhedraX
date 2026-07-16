@@ -43,8 +43,19 @@ export class GenerationEngine {
       }
     }
 
+    if (!context.khedraxRootDir) {
+      throw new Error('Generation context must include khedraxRootDir');
+    }
     const packagingEngine = new PackagingEngine();
-    const packageResult = await packagingEngine.run({ tempDir, outputDir: resolvedOutputPath, name: context.dna.name, force: effectiveForce });
+    const packageResult = await packagingEngine.run({
+      tempDir,
+      outputDir: resolvedOutputPath,
+      name: context.dna.name,
+      force: effectiveForce,
+      dna: context.dna,
+      resolvedModuleDescriptors: (artifacts.module as { resolvedModuleDescriptors?: Array<{ name: string; version?: string }> } | undefined)?.resolvedModuleDescriptors ?? [],
+      khedraxRootDir: context.khedraxRootDir,
+    });
     return { outputPath: packageResult.outputPath, tempDir };
   }
 }

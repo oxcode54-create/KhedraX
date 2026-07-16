@@ -25,7 +25,7 @@ export function buildCreateAgentStep(options: CreateAgentRequest): WorkflowStep 
       }
       const engine = new GenerationEngine();
       const tempDir = path.join(path.dirname(options.outputDir), `.khedrax-${Date.now()}-${Math.random().toString(16).slice(2)}`);
-      const result = await engine.run({ dna, registry, tempDir, outputDir: options.outputDir, artifacts: checkpoint.artifacts, force: options.force });
+      const result = await engine.run({ dna, registry, tempDir, outputDir: options.outputDir, artifacts: checkpoint.artifacts, force: options.force, khedraxRootDir: rootDir });
       return { artifacts: { outputPath: result.outputPath, dna, validation } };
     },
   };

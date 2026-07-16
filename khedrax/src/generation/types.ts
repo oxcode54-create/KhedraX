@@ -8,6 +8,7 @@ export interface GenerationContext {
   outputDir?: string;
   artifacts: Record<string, unknown>;
   force?: boolean;
+  khedraxRootDir?: string;
 }
 
 export interface ProducerResult {
