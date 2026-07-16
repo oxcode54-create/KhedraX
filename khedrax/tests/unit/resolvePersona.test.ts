@@ -17,6 +17,7 @@ const registry: RegistrySnapshot = {
       escalationPolicy: 'Escalate after two failed attempts.',
     },
   },
+  memoryBackends: {},
 };
 
 test('resolvePersona merges preset and dna overrides', () => {

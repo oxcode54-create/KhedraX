@@ -13,7 +13,10 @@ export interface AgentDNA {
     constraints?: string[];
   };
   modules: string[];
-  memory: Record<string, unknown>;
+  memory: {
+    backend?: string;
+    config?: Record<string, unknown>;
+  };
   tools: Record<string, unknown>;
   workflows: Record<string, unknown>;
   deployment: Record<string, unknown>;

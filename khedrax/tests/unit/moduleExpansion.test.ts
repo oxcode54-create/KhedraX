@@ -49,8 +49,10 @@ test('multi-module composition assembles five modules without collisions', async
   assert.match(promptReadme, /#### rag\nThis module provides retrieval-augmented generation scaffolding/);
 
   const constraintsSection = promptReadme.split('## Constraints\n')[1]?.split('\n## ')[0] ?? '';
-  const uniqueConstraints = Array.from(new Set(constraintsSection.split('\n').filter(Boolean)));
-  assert.ok(uniqueConstraints.length >= 7);
+  const rawConstraints = constraintsSection.split('\n').filter(Boolean);
+  const uniqueConstraints = Array.from(new Set(rawConstraints));
+  assert.equal(uniqueConstraints.length, 9);
+  assert.equal(rawConstraints.length, uniqueConstraints.length);
   assert.ok(uniqueConstraints.some((line) => line.includes('Never expose raw memory contents verbatim to the end user.')));
   assert.ok(uniqueConstraints.some((line) => line.includes('Never DM a user without an explicit trigger from that user.')));
 });

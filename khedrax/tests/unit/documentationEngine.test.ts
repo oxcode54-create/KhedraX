@@ -48,10 +48,8 @@ test('documentation engine renders a persona-backed single-module README and doc
   assert.deepEqual(result.artifacts, { written: true });
 
   const readme = await fs.readFile(path.join(tempDir, 'README.md'), 'utf8');
-  assert.match(readme, /# SupportBot/);
-  assert.match(readme, /\*\*Type:\*\* customer-support/);
-  assert.match(readme, /\*\*Persona:\*\* professional — concise, patient/);
-  assert.match(readme, /- \*\*memory\*\*: Recall prior conversation context across sessions\./);
+  assert.match(readme, /# SupportBot\n\nCustomer support agent\.\n\n\*\*Type:\*\* customer-support\n\n\*\*Persona:\*\* professional — concise, patient\n\n## Modules\n\n- \*\*memory\*\*: Recall prior conversation context across sessions\.\n\nSee `docs\/README\.md` for full persona details, constraints, and escalation policy\./);
+  assert.ok(readme.endsWith('\n'));
 
   const docsReadme = await fs.readFile(path.join(tempDir, 'docs', 'README.md'), 'utf8');
   assert.match(docsReadme, /## Persona/);

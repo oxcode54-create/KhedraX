@@ -39,18 +39,13 @@ export class DocumentationEngine implements ProducerEngine {
     const modulesBlock = this.renderRootModules(resolvedModules);
     const rootContent = [
       `# ${context.dna.name}`,
-      '',
       context.dna.description || '',
-      '',
       `**Type:** ${context.dna.agent.type}`,
       personaLine,
-      '',
       '## Modules',
       modulesBlock,
-      '',
       'See `docs/README.md` for full persona details, constraints, and escalation policy.',
-      '',
-    ].filter((line) => line !== '').join('\n');
+    ].filter((line) => line !== '').join('\n\n') + '\n';
 
     const docsContent = [
       `# ${context.dna.name} — Agent Overview`,

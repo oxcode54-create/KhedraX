@@ -1,0 +1,6 @@
+{
+  "name": "in-memory",
+  "version": "1.0.0",
+  "description": "Ephemeral in-process memory store, cleared on restart.",
+  "configDefaults": { "maxEntries": 1000 }
+}

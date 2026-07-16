@@ -25,6 +25,7 @@ const registry: RegistrySnapshot = {
       escalationPolicy: 'Escalate after two failed attempts.',
     },
   },
+  memoryBackends: {},
 };
 
 test('PersonaEngine builds a behavioral profile from preset, dna, and module data', async () => {

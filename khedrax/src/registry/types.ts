@@ -29,8 +29,16 @@ export interface PersonaDescriptor {
   escalationPolicy?: string;
 }
 
+export interface MemoryBackendDescriptor {
+  name: string;
+  version: string;
+  description: string;
+  configDefaults: Record<string, unknown>;
+}
+
 export interface RegistrySnapshot {
   agentTypes: Record<string, AgentTypeDescriptor>;
   modules: Record<string, ModuleDescriptor>;
   personas: Record<string, PersonaDescriptor>;
+  memoryBackends: Record<string, MemoryBackendDescriptor>;
 }

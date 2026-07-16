@@ -1,0 +1,6 @@
+{
+  "name": "redis",
+  "version": "1.0.0",
+  "description": "Persistent memory store backed by Redis.",
+  "configDefaults": { "host": "localhost", "port": 6379, "ttlSeconds": 86400 }
+}

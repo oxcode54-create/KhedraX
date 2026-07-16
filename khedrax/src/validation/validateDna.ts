@@ -44,6 +44,14 @@ export function validateAgentDNA(dna: AgentDNA, registry: RegistrySnapshot, outp
     errors.push('AgentDNA.persona.constraints must be an array of non-empty strings.');
   }
 
+  if (dna.memory.backend && !registry.memoryBackends[dna.memory.backend]) {
+    errors.push(`Unknown memory backend '${dna.memory.backend}'.`);
+  }
+
+  if (dna.memory.config && (Array.isArray(dna.memory.config) || dna.memory.config === null || typeof dna.memory.config !== 'object')) {
+    errors.push('AgentDNA.memory.config must be an object if present.');
+  }
+
   if (dna.modules.includes('memory') && Object.keys(dna.memory).length === 0) {
     warnings.push('Memory module selected without memory configuration; a minimal shape will be scaffolded.');
   }
