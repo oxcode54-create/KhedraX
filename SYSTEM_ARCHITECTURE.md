@@ -39,8 +39,8 @@ KhedraX
 | CLI | Fully implemented |
 | Workflow Engine | Fully implemented (checkpoint + resume) |
 | DNA System | Fully implemented |
-| Registry System | Fully implemented (agentTypes/, modules/, personas/, and, as of Work Package #6, memoryBackends/ discovery) |
-| Validation Engine | Implemented at schema + registry-cross-check level only |
+| Registry System | Fully implemented (agentTypes/, modules/ — including, as of Work Package #8, each module's declared prompt-fragment section/exclusivity metadata — personas/, and memoryBackends/ discovery) |
+| Validation Engine | Implemented at schema + registry-cross-check level, plus, as of Work Package #8, cross-field checks: duplicate module detection and a pre-flight exclusive-prompt-section conflict check shared with Prompt Engine's own generation-time check |
 | Generation Engine | Fully implemented as orchestrator |
 | Template Engine | Fully implemented |
 | Module Engine | Fully implemented |
@@ -119,8 +119,8 @@ Engine.
 - **Never:** knows what any individual step does internally; contains DNA, Registry, or template logic
 
 ### Validation Engine
-- **Owns:** DNA schema validation, DNA-vs-Registry cross-checks (does the requested type/module exist), spec-safety scoring
-- **Reads:** draft `AgentDNA`, Registry System's available agentTypes/modules
+- **Owns:** DNA schema validation, DNA-vs-Registry cross-checks (does the requested type/module/persona/backend exist), duplicate-module detection, a pre-flight exclusive-prompt-section conflict check (Work Package #8 — shares its conflict-detection logic with Prompt Engine's own generation-time check, rather than duplicating it), spec-safety scoring
+- **Reads:** draft `AgentDNA`, Registry System's available agentTypes/modules/personas/memoryBackends, including each module's declared prompt-fragment section/exclusivity metadata
 - **Writes:** a validation report (errors/warnings), stored as a workflow artifact — never touches the generated project
 - **Never:** generates files, mutates DNA, executes any module or template code
 
@@ -137,8 +137,8 @@ Engine.
 - **Never:** knows about template files, module implementations, or how generation mechanically happens
 
 ### Registry System
-- **Owns:** discovery and indexing of `agentTypes/`, `modules/`, `personas/` (Work Package #2), and, as of Work Package #6, `memoryBackends/` from the filesystem — `prompt-fragments/` remains a future addition
-- **Reads:** those filesystem directories, each entry's own metadata file (`agentType.json`, `module.json`, `persona.json`, `backend.json`)
+- **Owns:** discovery and indexing of `agentTypes/`, `modules/` (each module's descriptor now also carries its declared prompt-fragment `section`/`exclusive` metadata, as of Work Package #8 — read from that module's `prompts/fragment.meta.json` using the same shared default-filling logic Prompt Engine uses, never duplicated), `personas/` (Work Package #2), and `memoryBackends/` (Work Package #6) from the filesystem
+- **Reads:** those filesystem directories, each entry's own metadata file (`agentType.json`, `module.json`, `persona.json`, `backend.json`, and now each module's `prompts/fragment.meta.json`)
 - **Writes:** nothing — read-only index, optionally cached in memory per run
 - **Never:** validates DNA content itself (that's Validation Engine); renders anything; encodes meaning about what a type or module "does"
 
