@@ -44,3 +44,31 @@ test('createAgent produces a standalone project from the real entry point', asyn
   const readme = await fs.readFile(path.join(result.outputPath, 'README.md'), 'utf8');
   assert.equal(readme.includes('khedrax'), false);
 });
+
+test('createAgent rejects duplicate modules from the raw CLI module list', async () => {
+  const workspace = await fs.mkdtemp(path.join(os.tmpdir(), 'khedrax-e2e-'));
+  const fixtureRoot = path.join(workspace, 'fixture');
+  const outputDir = path.join(workspace, 'out');
+  await copyFixture(fixtureRoot);
+
+  await assert.rejects(
+    () => createAgent({
+      name: 'SupportBot',
+      type: 'basic',
+      outputDir,
+      modules: ['memory', 'memory'],
+      force: true,
+      verbose: false,
+      rootDir: fixtureRoot,
+    } as any),
+    /Duplicate module\(s\) in modules list: memory\./,
+  );
+
+  let exists = true;
+  try {
+    await fs.access(outputDir);
+  } catch {
+    exists = false;
+  }
+  assert.equal(exists, false);
+});

@@ -12,6 +12,21 @@ export interface ValidationResult {
 
 const RESERVED_NAMES = new Set(['test', 'khedrax', 'node_modules']);
 
+export function findDuplicateModuleNames(moduleNames: readonly string[] | undefined): string[] {
+  const seen = new Map<string, number>();
+  const duplicates = new Set<string>();
+
+  for (const moduleName of moduleNames ?? []) {
+    const count = (seen.get(moduleName) ?? 0) + 1;
+    seen.set(moduleName, count);
+    if (count > 1) {
+      duplicates.add(moduleName);
+    }
+  }
+
+  return Array.from(duplicates).sort();
+}
+
 export function validateAgentDNA(dna: AgentDNA, registry: RegistrySnapshot, outputDir?: string, force?: boolean): ValidationResult {
   const errors: string[] = [];
   const warnings: string[] = [];
@@ -27,21 +42,15 @@ export function validateAgentDNA(dna: AgentDNA, registry: RegistrySnapshot, outp
     errors.push(`AgentDNA.agent.type '${dna.agent.type}' is not registered.`);
   }
 
-  const seenModules = new Map<string, number>();
-  const duplicateModules = new Set<string>();
+  const duplicateModules = findDuplicateModuleNames(dna.modules);
   for (const moduleName of dna.modules) {
-    const count = (seenModules.get(moduleName) ?? 0) + 1;
-    seenModules.set(moduleName, count);
-    if (count > 1) {
-      duplicateModules.add(moduleName);
-    }
     if (!registry.modules[moduleName]) {
       errors.push(`Unknown module '${moduleName}'.`);
     }
   }
 
-  if (duplicateModules.size > 0) {
-    errors.push(`Duplicate module(s) in modules list: ${Array.from(duplicateModules).sort().join(', ')}.`);
+  if (duplicateModules.length > 0) {
+    errors.push(`Duplicate module(s) in modules list: ${duplicateModules.join(', ')}.`);
   }
 
   const validModuleNames = dna.modules.filter((moduleName) => Boolean(registry.modules[moduleName]));

@@ -1,8 +1,14 @@
 import { getDefaultDNA } from './defaults.ts';
 import type { AgentDNA, CreateAgentOptions } from './schema.ts';
 import type { RegistrySnapshot } from '../registry/types.ts';
+import { findDuplicateModuleNames } from '../validation/validateDna.ts';
 
 export async function buildAgentDNA(options: CreateAgentOptions, registry: RegistrySnapshot): Promise<AgentDNA> {
+  const duplicateModules = findDuplicateModuleNames(options.modules);
+  if (duplicateModules.length > 0) {
+    throw new Error(`Duplicate module(s) in modules list: ${duplicateModules.join(', ')}.`);
+  }
+
   const base = getDefaultDNA(options.name, options.type) as unknown as AgentDNA;
   const mergedModules: string[] = [];
   const seenModules = new Set<string>();
