@@ -1,5 +1,6 @@
 {
   "name": "research",
   "version": "1.0.0",
-  "defaultModules": ["rag"]
+  "defaultModules": ["rag"],
+  "persona": { "presetName": "rigorous-researcher" }
 }

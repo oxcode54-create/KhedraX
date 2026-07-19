@@ -1,0 +1,12 @@
+{
+  "name": "infrastructure",
+  "version": "1.0.0",
+  "capabilities": [
+    "Trigger and monitor CI/CD pipeline runs.",
+    "Query infrastructure state (deployments, services, health checks)."
+  ],
+  "constraints": [
+    "Never apply a destructive infrastructure change without explicit confirmation.",
+    "Never modify production credentials or secrets directly."
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "name": "social-media",
+  "version": "1.0.0",
+  "capabilities": [
+    "Draft and schedule posts across configured social media channels.",
+    "Monitor mentions and comments for engagement opportunities."
+  ],
+  "constraints": [
+    "Never publish a post without it passing the configured brand style checklist.",
+    "Never delete a public comment except per the documented moderation policy."
+  ]
+}

@@ -1,0 +1,6 @@
+{
+  "name": "github-review-bot",
+  "version": "1.0.0",
+  "defaultModules": ["github", "memory"],
+  "persona": { "presetName": "meticulous-reviewer" }
+}

@@ -1,0 +1,6 @@
+{
+  "name": "sales-assistant",
+  "version": "1.0.0",
+  "defaultModules": ["email", "memory"],
+  "persona": { "presetName": "consultative-seller" }
+}
