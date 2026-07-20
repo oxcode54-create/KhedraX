@@ -1,0 +1,6 @@
+{
+  "name": "discord-moderator",
+  "version": "1.0.0",
+  "defaultModules": ["discord", "memory"],
+  "persona": { "presetName": "vigilant-moderator" }
+}

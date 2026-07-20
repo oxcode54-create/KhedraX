@@ -18,6 +18,8 @@ export interface ModuleDescriptor {
   requiresMemory?: boolean;
   capabilities?: string[];
   constraints?: string[];
+  promptSection?: string;
+  promptExclusive?: boolean;
 }
 
 export interface PersonaDescriptor {

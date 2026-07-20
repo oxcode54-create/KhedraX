@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import type { FragmentMeta } from './types.ts';
+import { parseFragmentMeta } from './fragmentMetaDefaults.ts';
 
 const DEFAULT_META: FragmentMeta = {
   section: 'instructions',
@@ -22,17 +23,7 @@ export async function readFragmentMeta(moduleDir: string): Promise<FragmentMeta>
       return DEFAULT_META;
     }
 
-    const meta: FragmentMeta = {
-      section: typeof parsed.section === 'string' && parsed.section.trim().length > 0
-        ? parsed.section.trim()
-        : DEFAULT_META.section,
-      priority: Number.isFinite(parsed.priority as number)
-        ? Number(parsed.priority)
-        : DEFAULT_META.priority,
-      exclusive: typeof parsed.exclusive === 'boolean'
-        ? parsed.exclusive
-        : DEFAULT_META.exclusive,
-    };
+    const meta = parseFragmentMeta(parsed);
 
     if (typeof parsed.section !== 'undefined' && (typeof parsed.section !== 'string' || parsed.section.trim().length === 0)) {
       console.warn(`Invalid section in fragment.meta.json for module at ${moduleDir}; falling back to default '${DEFAULT_META.section}'.`);
@@ -45,7 +36,7 @@ export async function readFragmentMeta(moduleDir: string): Promise<FragmentMeta>
     }
 
     return meta;
-  } catch (error) {
+  } catch {
     return DEFAULT_META;
   }
 }

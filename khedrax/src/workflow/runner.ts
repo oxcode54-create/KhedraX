@@ -1,4 +1,4 @@
-import { loadCheckpoint, saveCheckpoint } from '../cli/utils/checkpoint.ts';
+import { loadCheckpoint, saveCheckpoint } from './checkpoint.ts';
 
 export interface StepResult { artifacts?: Record<string, unknown>; }
 export interface WorkflowStep {

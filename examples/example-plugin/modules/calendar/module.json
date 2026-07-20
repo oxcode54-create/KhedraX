@@ -1,0 +1,12 @@
+{
+  "name": "calendar",
+  "version": "1.0.0",
+  "capabilities": [
+    "Schedule meetings and reminders.",
+    "Coordinate availability across participants."
+  ],
+  "constraints": [
+    "Never schedule a meeting without a clear organizer and objective.",
+    "Never share private calendar details with unrelated recipients."
+  ]
+}

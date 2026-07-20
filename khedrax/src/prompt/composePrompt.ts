@@ -2,6 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import type { FragmentMeta, ModuleFragment, ComposedPrompt } from './types.ts';
 import { readFragmentMeta } from './readFragmentMeta.ts';
+import { detectExclusiveConflicts } from './detectExclusiveConflicts.ts';
 
 export async function composePrompt(
   tempDir: string,
@@ -66,14 +67,16 @@ export async function composePrompt(
 
     const instructionLines: string[] = [];
     for (const [section, group] of instructionsGroups) {
-      const exclusive = group.filter((fragment) => fragment.meta.exclusive);
-      if (exclusive.length > 1) {
-        const moduleNames = exclusive.map((fragment) => fragment.moduleName).sort();
-        throw new Error(
-          `Prompt composition conflict: modules "${moduleNames.join('", "')}" both claim exclusive ownership of section "${section}".`,
-        );
+      const conflictMessage = detectExclusiveConflicts(group.map((fragment) => ({
+        moduleName: fragment.moduleName,
+        section,
+        exclusive: fragment.meta.exclusive,
+      })));
+      if (conflictMessage) {
+        throw new Error(conflictMessage);
       }
 
+      const exclusive = group.filter((fragment) => fragment.meta.exclusive);
       const included = exclusive.length === 1
         ? [exclusive[0]]
         : [...group].sort((a, b) => {

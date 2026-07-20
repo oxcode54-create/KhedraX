@@ -1,0 +1,6 @@
+{
+  "name": "social-media-manager",
+  "version": "1.0.0",
+  "defaultModules": ["memory", "social-media"],
+  "persona": { "presetName": "engaging-brand-voice" }
+}

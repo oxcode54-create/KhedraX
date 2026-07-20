@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
-import type { Checkpoint } from '../../workflow/runner.ts';
+import type { Checkpoint } from './runner.ts';
 
 export async function loadCheckpoint(buildId: string): Promise<Checkpoint | null> {
   const checkpointPath = path.join(os.homedir(), '.khedrax', 'checkpoints', `${buildId}.json`);

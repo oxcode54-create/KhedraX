@@ -31,4 +31,5 @@ export interface CreateAgentOptions {
   force: boolean;
   verbose: boolean;
   resume?: string;
+  persona?: string;
 }

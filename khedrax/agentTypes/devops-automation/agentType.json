@@ -1,0 +1,6 @@
+{
+  "name": "devops-automation",
+  "version": "1.0.0",
+  "defaultModules": ["github", "infrastructure", "memory"],
+  "persona": { "presetName": "cautious-operator" }
+}

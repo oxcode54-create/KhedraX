@@ -22,6 +22,9 @@ let force = false;
 let resume: string | undefined;
 let verbose = false;
 let modules: string[] = [];
+let persona: string | undefined;
+const pluginRootsFromEnv = (process.env.KHEDRAX_PLUGIN_PATH ?? '').split(':').map((value) => value.trim()).filter(Boolean);
+const pluginRoots: string[] = [...pluginRootsFromEnv];
 for (let index = 0; index < args.length; index += 1) {
   const arg = args[index];
   if (arg === '--type' && args[index + 1]) {
@@ -40,6 +43,12 @@ for (let index = 0; index < args.length; index += 1) {
   } else if (arg === '--modules' && args[index + 1]) {
     modules = args[index + 1].split(',').map((value) => value.trim()).filter(Boolean);
     index += 1;
+  } else if (arg === '--persona' && args[index + 1]) {
+    persona = args[index + 1];
+    index += 1;
+  } else if (arg === '--plugin-path' && args[index + 1]) {
+    pluginRoots.push(args[index + 1]);
+    index += 1;
   }
 }
 
@@ -52,6 +61,8 @@ try {
     force,
     verbose,
     resume,
+    persona,
+    pluginRoots,
   });
   console.log(result.outputPath);
 } catch (error) {

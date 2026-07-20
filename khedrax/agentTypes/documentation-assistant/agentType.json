@@ -1,0 +1,6 @@
+{
+  "name": "documentation-assistant",
+  "version": "1.0.0",
+  "defaultModules": ["rag", "github"],
+  "persona": { "presetName": "clear-communicator" }
+}

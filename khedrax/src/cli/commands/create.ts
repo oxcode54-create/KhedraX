@@ -4,12 +4,13 @@ import { getRegistrySnapshot } from '../../registry/index.ts';
 import { validateAgentDNA } from '../../validation/validateDna.ts';
 import { GenerationEngine } from '../../generation/generationEngine.ts';
 import { runWorkflow } from '../../workflow/runner.ts';
-import { loadCheckpoint, saveCheckpoint } from '../utils/checkpoint.ts';
+import { loadCheckpoint, saveCheckpoint } from '../../workflow/checkpoint.ts';
 import type { CreateAgentOptions } from '../../dna/schema.ts';
 import type { Checkpoint, WorkflowStep } from '../../workflow/runner.ts';
 
 export interface CreateAgentRequest extends CreateAgentOptions {
   rootDir?: string;
+  pluginRoots?: string[];
 }
 
 export function buildCreateAgentStep(options: CreateAgentRequest): WorkflowStep {
@@ -17,7 +18,7 @@ export function buildCreateAgentStep(options: CreateAgentRequest): WorkflowStep 
     name: 'create-agent',
     async fn(checkpoint) {
       const rootDir = options.rootDir ?? path.resolve(path.dirname(new URL(import.meta.url).pathname), '..', '..', '..');
-      const registry = await getRegistrySnapshot(rootDir);
+      const registry = await getRegistrySnapshot(rootDir, options.pluginRoots ?? []);
       const dna = await buildAgentDNA(options, registry);
       const validation = validateAgentDNA(dna, registry, options.outputDir, options.force);
       if (!validation.valid) {

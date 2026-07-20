@@ -6,7 +6,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { load } from 'js-yaml';
 import { createAgent } from '../../src/cli/commands/create.ts';
-import { loadCheckpoint, saveCheckpoint } from '../../src/cli/utils/checkpoint.ts';
+import { loadCheckpoint, saveCheckpoint } from '../../src/workflow/checkpoint.ts';
 import { checkNodeVersion } from '../../src/cli/utils/nodeVersion.ts';
 import { buildAgentDNA } from '../../src/dna/loader.ts';
 import { getRegistrySnapshot } from '../../src/registry/index.ts';
