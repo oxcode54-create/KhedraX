@@ -1,4 +1,3 @@
-
 # KhedraX Architecture Changelog
 
 Tracks architecture version changes, per `VERSIONING_POLICY.md`. Distinct
@@ -29,27 +28,27 @@ produced, effective at the versioning policy's introduction.
 - **WP1** — DNA System, Registry System, Workflow Engine, Generation Engine
   (orchestrating Template Engine + Module Engine), Packaging Engine
   (minimum-viable)
-  - **WP1 Fix Passes** — Workflow Engine wiring, safe overwrite defaults,
-    module prompt-fragment namespacing, `agent.yaml` rendering correctness
-  - **WP2** — Persona Engine (real implementation): persona registry,
-    constraint derivation, capability mapping, behavioral profile generation
-  - **WP3** — Prompt Engine (real implementation): layered composition,
-    conflict resolution, prompt assembly pipeline
-  - **WP4** — Module Engine expansion: discord, email, github, rag modules
-    (data-only, zero engine changes — confirmed by review)
-  - **WP5** — Documentation Engine (real implementation): persona/module-aware
-    root README and detailed docs/README
-  - **WP6** — Memory Engine (real implementation): memory backend registry,
-    config resolution, module memory-requirement cross-referencing
-  - **WP7** — Packaging Engine (real implementation): dependency manifest,
-    hardened standalone scan (leaked build-time path detection)
-  - **WP8** — Validation Engine: duplicate-module detection, pre-flight
-    exclusive-prompt-section conflict check (shared logic with Prompt Engine)
-  - **WP9** — Backlog cleanup: checkpoint relocation to Workflow Engine,
-    `--persona` CLI flag, js-yaml dependency verification
-  - **WP10** — Registry expansion: eight-agent production portfolio, six new
-    agent types, seven new personas, two new modules — zero engine changes
-    (confirmed by review)
+- **WP1 Fix Passes** — Workflow Engine wiring, safe overwrite defaults,
+  module prompt-fragment namespacing, `agent.yaml` rendering correctness
+- **WP2** — Persona Engine (real implementation): persona registry,
+  constraint derivation, capability mapping, behavioral profile generation
+- **WP3** — Prompt Engine (real implementation): layered composition,
+  conflict resolution, prompt assembly pipeline
+- **WP4** — Module Engine expansion: discord, email, github, rag modules
+  (data-only, zero engine changes — confirmed by review)
+- **WP5** — Documentation Engine (real implementation): persona/module-aware
+  root README and detailed docs/README
+- **WP6** — Memory Engine (real implementation): memory backend registry,
+  config resolution, module memory-requirement cross-referencing
+- **WP7** — Packaging Engine (real implementation): dependency manifest,
+  hardened standalone scan (leaked build-time path detection)
+- **WP8** — Validation Engine: duplicate-module detection, pre-flight
+  exclusive-prompt-section conflict check (shared logic with Prompt Engine)
+- **WP9** — Backlog cleanup: checkpoint relocation to Workflow Engine,
+  `--persona` CLI flag, js-yaml dependency verification
+- **WP10** — Registry expansion: eight-agent production portfolio, six new
+  agent types, seven new personas, two new modules — zero engine changes
+  (confirmed by review)
 
 **Baseline frozen:** 13 engines, the dependency graph and ownership matrix
 in `SYSTEM_ARCHITECTURE.md`, and `AgentDNA`'s top-level shape, all as of
